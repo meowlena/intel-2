@@ -89,8 +89,7 @@ printMsg proc near
         inc si
         cmp [si], LF
         jz retPM
-        cmp [si], 0
-        jz retPM
+
         jmp loopPM
     retPM:
         ret
@@ -116,8 +115,8 @@ readString proc near
         mov ah, 0h      ;; seta modo
         int 16h         ;; pra ler caractere do teclado
 
-        cmp al, 0Dh     ;; compara se caractere é enter
-        jz readRet      ;; se for, condição de parada 
+        cmp al, CR      ;; compara se caractere é enter
+        je readRet      ;; se for, condição de parada 
         
         mov [si], al
         inc si
