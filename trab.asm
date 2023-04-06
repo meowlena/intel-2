@@ -10,19 +10,26 @@
 
 
 .DATA
-    comando    DB 512 DUP(?)    ; nome do arquivo de entrada
+    comando         DB 512 DUP(?)    ; nome do arquivo de entrada
+    sizeCode        DB 0
+    Quociente       DB 132
+    Resto           DB 0
+    NumAlgarismos   DB 0
+    BufferConversao DB 0
 
 .CONST
     CR          equ 0Dh         ; Código ASCII de CR
     LF          equ 0Ah         ; Código ASCII de LF
+    space       equ 20h         ; Código ASCII de espaço
     msgStartup  DB  "# Verificador de correspondencia de arquivo # ", CR, LF, 0
     msgInput    DB  "Digite o comando desejado: ", CR, LF, 0
-
+    ConstDez DB 10
 .CODE ; Begin code segment
 .STARTUP ; Generate start-up code
-;--------------------------------------------------------------------------------cut
+;-------------------------------------------------------------------
 
-;---interação com usuário (comando)------------------------------ 
+;---interação com usuário (comando)---------------------------------
+    
     lea si, msgStartup
     call printMsg
     call printEnter
@@ -35,13 +42,21 @@
     call readString
     call printEnter
 
-    lea si, comando
-    call printMsg
-    call printEnter
 
 ;--------------------------------------------------------------------
 
 ;---processsamento comando-------------------------------------------
+
+    lea bp, comando
+    
+    call ConverteAsciiHexToDecimal
+
+
+    mov al, BufferConversao
+    
+    call printNumero
+    call printEnter
+
 
 ;--------------------------------------------------------------------
 
@@ -112,6 +127,110 @@ readString proc near
 
 readString endp
 
+
+;--------------------------------------------------------------------
+;Funcao: printa um numero na tela
+;Entra:  (A) -> ax -> numero a ser printado
+;--------------------------------------------------------------------
+; TODO adaptar pra hex
+printNumero proc near
+    mov Quociente, al
+    NumPraASCIIDivisaoLoop2:
+            mov al, Quociente
+            mov ah, 0
+
+            div ConstDez
+            mov Quociente, al
+            mov Resto, ah
+
+            add Resto, 48
+            mov al, Resto
+            mov ah, 0
+            push ax
+
+            inc numAlgarismos
+
+            cmp Quociente, 0
+            je loopEscreveNumero2
+            jmp NumPraASCIIDivisaoLoop2
+
+    loopEscreveNumero2:
+        cmp numAlgarismos, 0
+        je fimEscreveNumero2
+
+        pop ax
+        call printChar
+
+        dec numAlgarismos
+
+        jmp loopEscreveNumero2
+
+    fimEscreveNumero2:
+    ret
+printNumero endp
+
+;--------------------------------------------------------------------
+;Funcao: converte ascii hex pra decimal
+;Entra:  (A) -> bp -> ponteiro para código de verificação  
+;        (S) -> BufferConversao: com o valor 
+;--------------------------------------------------------------------
+ConverteAsciiHexToDecimal proc near
+    ; verifica se está entre 0 e 9
+    ; se não, verifica se está entre A e F 
+    ; (a e f converte pra upper case)
+    cmp byte ptr [bp], '0'
+    jl charInvalid
+    cmp byte ptr [bp], '9'
+    jg isUpperCaseHex
+
+    mov bl, byte ptr [bp]
+    mov BufferConversao, bl
+
+    ; convertendo ascii pra numero
+    sub BufferConversao, 48
+    ret
+
+    retCheckHex:
+        ; convertendo o valor das letras 
+        sub BufferConversao, 55
+    ret
+
+isUpperCaseHex:
+    ; seta flag marcando que está entre A e F por padrão
+    ; verifica se está entre A e F
+    ; se não, verifica se está entre a e f
+
+    cmp byte ptr [bp], 'A'
+    jl charInvalid
+
+    cmp byte ptr [bp], 'F'
+    jg isLowerCaseHex
+    
+    mov bl, byte ptr [bp]
+    mov BufferConversao, bl
+
+    jmp retCheckHex
+
+isLowerCaseHex:
+    ; verifica se está entre a e f
+    ; se sim, converte pra upper case
+    ; se não, é char inválido (não hexadecimal)
+    cmp byte ptr [bp], 'a'
+    jl charInvalid
+
+    cmp byte ptr [bp], 'f'
+    jg charInvalid
+    
+    ; converte pra upper case
+    mov bl, byte ptr [bp]
+    mov BufferConversao, bl
+    sub BufferConversao, 32
+
+    jmp retCheckHex
+
+charInvalid:
+    ret
+ConverteAsciiHexToDecimal endp
 ;
 ;--------------------------------------------------------------------
 	end
