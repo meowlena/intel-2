@@ -11,7 +11,7 @@
 
 .DATA
     comando         DB 512 DUP(?)    ; nome do arquivo de entrada
-    sizeCode        DB 0
+    codeLength      DB 0
     Quociente       DB 132
     Resto           DB 0
     NumAlgarismos   DB 0
@@ -50,11 +50,13 @@
 
     lea bp, comando
     
-    call ConverteAsciiHexToDecimal
+    call getCodeLength
+    mov al, codeLength
+    call printNumeroDecimal
 
-    mov al, BufferConversao
+    ;mov al, BufferConversao
     
-    call printNumeroHex
+    ;call printNumeroHex
     call printEnter
 
 
@@ -226,12 +228,12 @@ ConverteAsciiHexToDecimal proc near
     ; verifica se está entre 0 e 9
     ; se não, verifica se está entre A e F 
     ; (a e f converte pra upper case)
-    cmp byte ptr [bp], '0'
+    cmp byte ptr [bp + di], '0'
     jl charInvalid
-    cmp byte ptr [bp], '9'
+    cmp byte ptr [bp + di], '9'
     jg isUpperCaseHex
 
-    mov bl, byte ptr [bp]
+    mov bl, byte ptr [bp + di]
     mov BufferConversao, bl
 
     ; convertendo ascii pra numero
@@ -248,13 +250,13 @@ isUpperCaseHex:
     ; verifica se está entre A e F
     ; se não, verifica se está entre a e f
 
-    cmp byte ptr [bp], 'A'
+    cmp byte ptr [bp + di], 'A'
     jl charInvalid
 
-    cmp byte ptr [bp], 'F'
+    cmp byte ptr [bp + di], 'F'
     jg isLowerCaseHex
     
-    mov bl, byte ptr [bp]
+    mov bl, byte ptr [bp + di]
     mov BufferConversao, bl
 
     jmp retCheckHex
@@ -263,14 +265,14 @@ isLowerCaseHex:
     ; verifica se está entre a e f
     ; se sim, converte pra upper case
     ; se não, é char inválido (não hexadecimal)
-    cmp byte ptr [bp], 'a'
+    cmp byte ptr [bp + di], 'a'
     jl charInvalid
 
-    cmp byte ptr [bp], 'f'
+    cmp byte ptr [bp + di], 'f'
     jg charInvalid
     
     ; converte pra upper case
-    mov bl, byte ptr [bp]
+    mov bl, byte ptr [bp + di]
     mov BufferConversao, bl
     sub BufferConversao, 32
 
@@ -279,6 +281,23 @@ isLowerCaseHex:
 charInvalid:
     ret
 ConverteAsciiHexToDecimal endp
+
+
+;--------------------------------------------------------------------
+;Funcao: retorna tamanho do código
+;Entra:  (A) -> bp -> ponteiro para código de verificação  
+;        (S) -> codeLength: variável com o tamanho do código
+;--------------------------------------------------------------------
+getCodeLength proc near
+    mov di, 0
+        
+        loopGetLength:
+            inc di
+            inc codeLength
+            cmp byte ptr [bp + di], ' '
+            jne loopGetLength
+    ret
+getCodeLength endp
 ;
 ;--------------------------------------------------------------------
 	end
