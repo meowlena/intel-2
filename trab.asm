@@ -23,7 +23,8 @@
     space       equ 20h         ; Código ASCII de espaço
     msgStartup  DB  "# Verificador de correspondencia de arquivo # ", CR, LF, 0
     msgInput    DB  "Digite o comando desejado: ", CR, LF, 0
-    ConstDez DB 10
+    ConstDez    DB 10
+    ConstHex    DB 16
 .CODE ; Begin code segment
 .STARTUP ; Generate start-up code
 ;-------------------------------------------------------------------
@@ -54,7 +55,7 @@
 
     mov al, BufferConversao
     
-    call printNumero
+    call printNumeroHex
     call printEnter
 
 
@@ -129,11 +130,61 @@ readString endp
 
 
 ;--------------------------------------------------------------------
-;Funcao: printa um numero na tela
+;Funcao: printa um numero na tela na base hexa
 ;Entra:  (A) -> ax -> numero a ser printado
 ;--------------------------------------------------------------------
 ; TODO adaptar pra hex
-printNumero proc near
+printNumeroHex proc near
+    mov Quociente, al
+    NumPraASCIIDivisaoLoopHex2:
+            mov al, Quociente
+            mov ah, 0
+
+            div ConstHex
+            mov Quociente, al
+            mov Resto, ah
+
+            cmp Resto, 10
+            jge printHexLetter
+
+            add Resto, 48
+            jmp printHexNotLetter
+
+            printHexLetter:
+            add Resto, 55
+
+            printHexNotLetter:
+            mov al, Resto
+            mov ah, 0
+            push ax
+
+            inc numAlgarismos
+
+            cmp Quociente, 0
+            je loopEscreveNumeroHex2
+            jmp NumPraASCIIDivisaoLoopHex2
+
+    loopEscreveNumeroHex2:
+        cmp numAlgarismos, 0
+        je fimEscreveNumero2
+
+        pop ax
+        call printChar
+
+        dec numAlgarismos
+
+        jmp loopEscreveNumeroHex2
+
+    fimEscreveNumeroHex2:
+    ret
+printNumeroHex endp
+
+;--------------------------------------------------------------------
+;Funcao: printa um numero na tela na base decimal
+;Entra:  (A) -> ax -> numero a ser printado
+;--------------------------------------------------------------------
+; TODO adaptar pra hex
+printNumeroDecimal proc near
     mov Quociente, al
     NumPraASCIIDivisaoLoop2:
             mov al, Quociente
@@ -167,7 +218,7 @@ printNumero proc near
 
     fimEscreveNumero2:
     ret
-printNumero endp
+printNumeroDecimal endp
 
 ;--------------------------------------------------------------------
 ;Funcao: converte ascii hex pra decimal
