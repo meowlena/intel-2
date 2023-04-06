@@ -52,7 +52,6 @@
     
     call ConverteAsciiHexToDecimal
 
-
     mov al, BufferConversao
     
     call printNumeroHex
@@ -133,10 +132,9 @@ readString endp
 ;Funcao: printa um numero na tela na base hexa
 ;Entra:  (A) -> ax -> numero a ser printado
 ;--------------------------------------------------------------------
-; TODO adaptar pra hex
 printNumeroHex proc near
     mov Quociente, al
-    NumPraASCIIDivisaoLoopHex2:
+    NumPraASCIIDivisaoLoopHex:
             mov al, Quociente
             mov ah, 0
 
@@ -161,21 +159,21 @@ printNumeroHex proc near
             inc numAlgarismos
 
             cmp Quociente, 0
-            je loopEscreveNumeroHex2
-            jmp NumPraASCIIDivisaoLoopHex2
+            je loopEscreveNumeroHex
+            jmp NumPraASCIIDivisaoLoopHex
 
-    loopEscreveNumeroHex2:
+    loopEscreveNumeroHex:
         cmp numAlgarismos, 0
-        je fimEscreveNumero2
+        je fimEscreveNumero
 
         pop ax
         call printChar
 
         dec numAlgarismos
 
-        jmp loopEscreveNumeroHex2
+        jmp loopEscreveNumeroHex
 
-    fimEscreveNumeroHex2:
+    fimEscreveNumeroHex:
     ret
 printNumeroHex endp
 
@@ -183,10 +181,9 @@ printNumeroHex endp
 ;Funcao: printa um numero na tela na base decimal
 ;Entra:  (A) -> ax -> numero a ser printado
 ;--------------------------------------------------------------------
-; TODO adaptar pra hex
 printNumeroDecimal proc near
     mov Quociente, al
-    NumPraASCIIDivisaoLoop2:
+    NumPraASCIIDivisaoLoop:
             mov al, Quociente
             mov ah, 0
 
@@ -202,21 +199,21 @@ printNumeroDecimal proc near
             inc numAlgarismos
 
             cmp Quociente, 0
-            je loopEscreveNumero2
-            jmp NumPraASCIIDivisaoLoop2
+            je loopEscreveNumero
+            jmp NumPraASCIIDivisaoLoop
 
-    loopEscreveNumero2:
+    loopEscreveNumero:
         cmp numAlgarismos, 0
-        je fimEscreveNumero2
+        je fimEscreveNumero
 
         pop ax
         call printChar
 
         dec numAlgarismos
 
-        jmp loopEscreveNumero2
+        jmp loopEscreveNumero
 
-    fimEscreveNumero2:
+    fimEscreveNumero:
     ret
 printNumeroDecimal endp
 
