@@ -23,8 +23,8 @@
     space       equ 20h         ; Código ASCII de espaço
     msgStartup  DB  "# Verificador de correspondencia de arquivo # ", CR, LF, 0
     msgInput    DB  "Digite o comando desejado: ", CR, LF, 0
-    ConstDez    equ 10
-    ConstHex    equ 16
+    ConstDez    db 10
+    ConstHex    db 16
 
     diffAsciiNumbers    equ     48
     diffAsciiLetters    equ     55
