@@ -25,8 +25,10 @@
     diffAsciiLetters    equ     55
     diffLowerToUpper    equ     32
 
-
-
+    msgComandoInvalido    DB  "Comando invalido ", CR, LF, 0
+    msgTrataArquivo    DB  "Trata arquivo", CR, LF, 0
+    msgCalculaCodigo    DB  "Calcula codigo", CR, LF, 0
+    msgVerificaCodigo    DB  "Verifica codigo ", CR, LF, 0
 
 .CODE ; Begin code segment
 .STARTUP ; Generate start-up code
@@ -47,11 +49,54 @@
 
     call printEnter
 
+    ;---------- read 'app -'---------
+    lea bp, command 
+    mov di, 0
+
+    cmp byte ptr [bp + di], 'a'
+    jne comando_invalido
+
+    inc di
+    cmp byte ptr [bp + di], 'p'
+    jne comando_invalido
+
+    inc di
+    cmp byte ptr [bp + di], 'p'
+    jne comando_invalido
+
+retorno_rot_parser:
+    inc di
+    cmp byte ptr [bp + di], ' '
+    jne comando_invalido    
+
+    ; verifica se char é um '-'
+    ; se sim, proximo char é uma flag 
+    inc di
+    cmp byte ptr [bp + di], '-'
+    jne comando_invalido
+    je checkFlag
+
     lea si, command
     call printMsg
 
+    
 ;--------------------------------------------------------------------
 
+;--------------------------------------------------------------------
+.EXIT
+;--------------------------------------------------------------------
+
+comando_invalido:
+    lea si, msgComandoInvalido
+    call printMsg
+    call printEnter
+
+;--------------------------------------------------------------------
+.EXIT
+;--------------------------------------------------------------------
+checkFlag:
+    inc di
+    call tratamento_flag
 ;--------------------------------------------------------------------
 .EXIT
 ;--------------------------------------------------------------------
@@ -135,6 +180,58 @@ getCodeLength proc near
             jne loopGetLength
     ret
 getCodeLength endp
+
+;--------------------------------------------------------------------
+;Funcao: checa a flag
+;Entra:  (A) -> bp -> ponteiro para o comando de verificação
+;               di -> deslocamento no comando
+;--------------------------------------------------------------------
+tratamento_flag proc near
+        ; flag de arquivo
+        cmp byte ptr [bp + di], 'a'
+        je is_filename
+
+        ; flag de calculo do código de verificação
+        cmp byte ptr [bp + di], 'g'
+        je is_calc
+
+        ; flag de verficação do código
+        cmp byte ptr [bp + di], 'v'
+        je is_verify
+    end_trat:
+    ret
+
+    is_filename:
+        call tratamento_arquivo
+        jmp end_trat
+    is_calc:
+        call calcula_codigo
+        jmp end_trat
+    is_verify:
+        call verifica_codigo
+        jmp end_trat
+tratamento_flag endp
+
+
+tratamento_arquivo proc near
+    lea si, msgTrataArquivo
+    call printMsg
+    ret
+tratamento_arquivo endp
+
+
+calcula_codigo proc near
+    lea si, msgCalculaCodigo
+    call printMsg
+    ret
+calcula_codigo endp
+
+
+verifica_codigo proc near
+    lea si, msgVerificaCodigo
+    call printMsg
+    ret
+verifica_codigo endp
 ;
 ;
 ;--------------------------------------------------------------------
