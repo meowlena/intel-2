@@ -54,11 +54,11 @@
 
 ;---processsamento comando-------------------------------------------
 
-   ; lea bp, comando
+    lea bp, comando
     
-    ;call getCodeLength
-    ;mov al, codeLength
-    ;call printNumeroDecimal
+    call getCodeLength
+    mov al, codeLength
+    call printNumeroDecimal
 
     ;mov al, BufferConversao
     
@@ -94,6 +94,8 @@ printMsg proc near
         call printChar
         inc si
         cmp [si], LF
+        jz retPM
+        cmp [si], 0
         jz retPM
 
         jmp loopPM
