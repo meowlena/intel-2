@@ -23,8 +23,12 @@
     space       equ 20h         ; Código ASCII de espaço
     msgStartup  DB  "# Verificador de correspondencia de arquivo # ", CR, LF, 0
     msgInput    DB  "Digite o comando desejado: ", CR, LF, 0
-    ConstDez    DB 10
-    ConstHex    DB 16
+    ConstDez    db 10
+    ConstHex    db 16
+
+    diffAsciiNumbers    equ     48
+    diffAsciiLetters    equ     55
+    diffLowerToUpper    equ     32
 .CODE ; Begin code segment
 .STARTUP ; Generate start-up code
 ;-------------------------------------------------------------------
@@ -91,8 +95,7 @@ printMsg proc near
         inc si
         cmp [si], LF
         jz retPM
-        cmp [si], 0
-        jz retPM
+
         jmp loopPM
     retPM:
         ret
@@ -118,8 +121,8 @@ readString proc near
         mov ah, 0h      ;; seta modo
         int 16h         ;; pra ler caractere do teclado
 
-        cmp al, 0Dh     ;; compara se caractere é enter
-        jz readRet      ;; se for, condição de parada 
+        cmp al, CR      ;; compara se caractere é enter
+        je readRet      ;; se for, condição de parada 
         
         mov [si], al
         inc si
@@ -146,14 +149,19 @@ printNumeroHex proc near
             mov Quociente, al
             mov Resto, ah
 
+            ; testa se o Resto >= 10 para fazer
+            ; a conversão com a constante adequada
             cmp Resto, 10
             jge printHexLetter
 
-            add Resto, 48
+
+            ; conversão se Resto < 10
+            add Resto, diffAsciiNumbers
             jmp printHexNotLetter
 
+            ; conversão se Resto >= 10
             printHexLetter:
-            add Resto, 55
+            add Resto, diffAsciiLetters
 
             printHexNotLetter:
             mov al, Resto
@@ -195,7 +203,7 @@ printNumeroDecimal proc near
             mov Quociente, al
             mov Resto, ah
 
-            add Resto, 48
+            add Resto, diffAsciiNumbers
             mov al, Resto
             mov ah, 0
             push ax
@@ -239,12 +247,12 @@ ConverteAsciiHexToDecimal proc near
     mov BufferConversao, bl
 
     ; convertendo ascii pra numero
-    sub BufferConversao, 48
+    sub BufferConversao, diffAsciiNumbers
     ret
 
     retCheckHex:
         ; convertendo o valor das letras 
-        sub BufferConversao, 55
+        sub BufferConversao, diffAsciiLetters
     ret
 
 isUpperCaseHex:
@@ -276,7 +284,7 @@ isLowerCaseHex:
     ; converte pra upper case
     mov bl, byte ptr [bp + di]
     mov BufferConversao, bl
-    sub BufferConversao, 32
+    sub BufferConversao, diffLowerToUpper
 
     jmp retCheckHex
 
