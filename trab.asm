@@ -43,21 +43,23 @@
     call readString
     call printEnter
 
-
+    lea si, comando
+    call printMsg
+    call printEnter
 ;--------------------------------------------------------------------
 
 ;---processsamento comando-------------------------------------------
 
-    lea bp, comando
+   ; lea bp, comando
     
-    call getCodeLength
-    mov al, codeLength
-    call printNumeroDecimal
+    ;call getCodeLength
+    ;mov al, codeLength
+    ;call printNumeroDecimal
 
     ;mov al, BufferConversao
     
     ;call printNumeroHex
-    call printEnter
+    ;call printEnter
 
 
 ;--------------------------------------------------------------------
